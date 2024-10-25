@@ -1,0 +1,6 @@
+@EstacionamientoAustralApi_HostAddress = http://localhost:5148
+
+GET {{EstacionamientoAustralApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
