@@ -8,11 +8,14 @@ namespace Data.Repositories
 {
     public class IEstacionamientoRepository
     {
+  
         private readonly ApplicationContext _context;
+        private readonly ITarifaRepository _tarifaRepository; // Inyección de dependencia
 
-        public IEstacionamientoRepository(ApplicationContext context)
+        public IEstacionamientoRepository(ApplicationContext context, ITarifaRepository tarifaRepository)
         {
             _context = context;
+            _tarifaRepository = tarifaRepository; // Asignamos el repositorio de tarifas
         }
 
         public List<Estacionamiento> GetAllEstacionamientos()
@@ -104,17 +107,27 @@ namespace Data.Repositories
 
         private decimal CalcularCosto(double minutosEstacionados)
         {
-            // Ejemplo básico de cálculo, asumiendo que las tarifas están definidas en el contexto
-            var tarifaMediaHora = _context.Tarifas.FirstOrDefault(t => t.Descripcion == "MEDIAHORA");
-            var tarifaHora = _context.Tarifas.FirstOrDefault(t => t.Descripcion == "VALORHORA");
+            // Obtener tarifas usando el repositorio de tarifas
+            var tarifaMediaHora = _tarifaRepository.GetAllTarifas()
+                .FirstOrDefault(t => t.Descripcion == "Media Hora");
+            var tarifaHora = _tarifaRepository.GetAllTarifas()
+                .FirstOrDefault(t => t.Descripcion == "1 Hora");
 
+
+            // Validar que las tarifas no sean nulas antes de usarlas
+            if (tarifaMediaHora == null || tarifaHora == null)
+            {
+                throw new InvalidOperationException("Las tarifas requeridas no están definidas en la base de datos.");
+            }
+
+            // Calcular el costo según el tiempo estacionado
             if (minutosEstacionados <= 30)
             {
-                return tarifaMediaHora?.Valor ?? 0;
+                return tarifaMediaHora.Valor;
             }
             else
             {
-                return (decimal)(minutosEstacionados / 60) * (tarifaHora?.Valor ?? 0);
+                return (decimal)(minutosEstacionados / 60) * tarifaHora.Valor;
             }
         }
     }

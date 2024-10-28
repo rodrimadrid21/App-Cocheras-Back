@@ -8,14 +8,24 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configurar CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontendLocalhost",
+        builder => builder
+            .WithOrigins("http://localhost:4200") // URL del frontend
+            .AllowAnyMethod()
+            .AllowAnyHeader());
+});
+
 // Add services to the container.
 builder.Services.AddControllers();
-// Inyección de dependencias para Repositorios
+
+// Inyección de dependencias para Repositorios y Servicios
 builder.Services.AddScoped<IUserRepository>();
 builder.Services.AddScoped<ITarifaRepository>();
 builder.Services.AddScoped<IEstacionamientoRepository>();
 builder.Services.AddScoped<ICocheraRepository>();
-// Inyección de dependencias para Servicios
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<TarifaService>();
 builder.Services.AddScoped<EstacionamientoService>();
@@ -26,7 +36,7 @@ builder.Services.AddEndpointsApiExplorer();
 // Configuración de Swagger para incluir JWT
 builder.Services.AddSwaggerGen(setupAction =>
 {
-    setupAction.AddSecurityDefinition("EstacionamientoAustralApi", new OpenApiSecurityScheme() //Esto va a permitir usar swagger con el token.
+    setupAction.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
     {
         Type = SecuritySchemeType.Http,
         Scheme = "Bearer",
@@ -41,14 +51,16 @@ builder.Services.AddSwaggerGen(setupAction =>
                 Reference = new OpenApiReference
                 {
                     Type = ReferenceType.SecurityScheme,
-                    Id = "EstacionamientoAustralApi" } //Tiene que coincidir con el id seteado arriba en la definición
+                    Id = "Bearer"
                 }
-            , new List<string>() }
+            }, new List<string>()
+        }
     });
 });
+
 // Configuración de autenticación con JWT
-builder.Services.AddAuthentication("Bearer") //"Bearer" es el tipo de auntenticación que tenemos que elegir después en PostMan para pasarle el token
-    .AddJwtBearer(options => //Acá definimos la configuración de la autenticación. le decimos qué cosas queremos comprobar. La fecha de expiración se valida por defecto.
+builder.Services.AddAuthentication("Bearer")
+    .AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
@@ -59,16 +71,13 @@ builder.Services.AddAuthentication("Bearer") //"Bearer" es el tipo de auntentica
             ValidAudience = builder.Configuration["Authentication:Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(builder.Configuration["Authentication:SecretForKey"]))
         };
-    }
-);
+    });
 
 // Configuración de Entity Framework y base de datos
 builder.Services.AddDbContext<ApplicationContext>(options =>
     options.UseSqlite(
         builder.Configuration["ConnectionStrings:DBConnectionString"],
         b => b.MigrationsAssembly("EstacionamientoAustralApi")));
-
-
 
 var app = builder.Build();
 
@@ -79,10 +88,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// Usar CORS
+app.UseCors("AllowFrontendLocalhost");
+
 app.UseHttpsRedirection();
-
+app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();

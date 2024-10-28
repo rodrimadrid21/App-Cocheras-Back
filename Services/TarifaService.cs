@@ -1,6 +1,8 @@
 ﻿using Data.Entities;
 using Data.Repositories;
+using Common.Dtos;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Services
 {
@@ -13,25 +15,41 @@ namespace Services
             _repository = repository;
         }
 
-        // Obtener todas las tarifas
-        public List<Tarifa> GetAllTarifas()
+        // Obtener todas las tarifas como DTOs
+        public List<TarifaDto> GetAllTarifas()
         {
-            return _repository.GetAllTarifas();
+            return _repository.GetAllTarifas().Select(t => new TarifaDto
+            {
+                Id = t.Id,
+                Descripcion = t.Descripcion,
+                Valor = t.Valor
+            }).ToList();
         }
 
-        // Obtener una tarifa por su ID
-        public Tarifa GetTarifaById(int id)
+        // Obtener una tarifa por su ID y mapear a DTO
+        public TarifaDto GetTarifaById(int id)
         {
-            return _repository.GetTarifaById(id);
+            var tarifa = _repository.GetTarifaById(id);
+            return tarifa == null ? null : new TarifaDto
+            {
+                Id = tarifa.Id,
+                Descripcion = tarifa.Descripcion,
+                Valor = tarifa.Valor
+            };
         }
 
-        // Agregar una nueva tarifa
-        public int AddTarifa(Tarifa tarifa)
+        // Agregar una nueva tarifa desde el DTO
+        public int AddTarifa(TarifaDto tarifaDto)
         {
+            var tarifa = new Tarifa
+            {
+                Descripcion = tarifaDto.Descripcion,
+                Valor = tarifaDto.Valor
+            };
             return _repository.AddTarifa(tarifa);
         }
 
-        // Actualizar el valor de una tarifa existente
+        // Actualizar el valor de una tarifa existente a partir del DTO
         public void UpdateTarifa(int id, decimal valor)
         {
             _repository.UpdateTarifa(id, valor);
