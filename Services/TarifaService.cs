@@ -49,7 +49,6 @@ namespace Services
             return _repository.AddTarifa(tarifa);
         }
 
-        // Actualizar el valor de una tarifa existente a partir del DTO
         public void UpdateTarifa(int id, decimal valor)
         {
             _repository.UpdateTarifa(id, valor);

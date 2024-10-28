@@ -1,6 +1,7 @@
 ﻿using Data.Repositories;
 using Data.Entities;
 using System.Collections.Generic;
+using Common.Dtos;
 
 namespace Services
 {
@@ -20,9 +21,18 @@ namespace Services
         }
 
         // Obtener todos los usuarios no eliminados
-        public List<User> GetAllUsers()
+        public List<UserDto> GetAllUsers()
         {
-            return _repository.GetAllUsers();
+            return _repository.GetAllUsers()
+                .Select(u => new UserDto
+                {
+                    Username = u.Username,
+                    Nombre = u.Nombre,
+                    Apellido = u.Apellido,
+                    Password = u.Password,
+                    Eliminado = u.Eliminado,
+                    EsAdmin = u.EsAdmin
+                }).ToList();
         }
 
         // Obtener un usuario por su ID

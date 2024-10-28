@@ -16,7 +16,6 @@ namespace EstacionamientoAustralApi.Controllers
             _tarifaService = tarifaService;
         }
 
-        // Obtener todas las tarifas
         [HttpGet]
         public ActionResult<List<TarifaDto>> GetAllTarifas()
         {
@@ -24,7 +23,6 @@ namespace EstacionamientoAustralApi.Controllers
             return tarifas.Count > 0 ? Ok(tarifas) : NotFound("No se encontraron tarifas.");
         }
 
-        // Obtener una tarifa por su ID
         [HttpGet("{id}")]
         public ActionResult<TarifaDto> GetTarifaById(int id)
         {
@@ -32,7 +30,6 @@ namespace EstacionamientoAustralApi.Controllers
             return tarifa == null ? NotFound($"Tarifa con ID {id} no encontrada.") : Ok(tarifa);
         }
 
-        // Agregar una nueva tarifa
         [HttpPost]
         public ActionResult<int> AddTarifa([FromBody] TarifaDto tarifaDto)
         {
@@ -43,19 +40,20 @@ namespace EstacionamientoAustralApi.Controllers
             return Ok(new { message = "Tarifa agregada con éxito.", tarifaId });
         }
 
-        // Actualizar el valor de una tarifa
         [HttpPut("{id}")]
-        public ActionResult UpdateTarifa(int id, [FromBody] decimal valor)
+        public ActionResult UpdateTarifa(int id, [FromBody] TarifaDto tarifaDto)
         {
+            if (tarifaDto == null)
+                return BadRequest("El cuerpo de la tarifa no puede estar vacío.");
+
             var tarifa = _tarifaService.GetTarifaById(id);
             if (tarifa == null)
                 return NotFound($"Tarifa con ID {id} no encontrada.");
 
-            _tarifaService.UpdateTarifa(id, valor);
+            _tarifaService.UpdateTarifa(id, tarifaDto.Valor);
             return Ok(new { message = "Tarifa actualizada con éxito." });
         }
 
-        // Eliminar una tarifa por su ID
         [HttpDelete("{id}")]
         public ActionResult DeleteTarifa(int id)
         {

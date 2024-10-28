@@ -1,6 +1,7 @@
 ﻿using Data.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Services;
+using Common.Dtos;
 using System.Collections.Generic;
 
 namespace EstacionamientoAustralApi.Controllers
@@ -18,7 +19,7 @@ namespace EstacionamientoAustralApi.Controllers
 
         // Obtener todas las cocheras no eliminadas
         [HttpGet]
-        public ActionResult<List<Cochera>> GetAllCocheras()
+        public ActionResult<List<CocheraDto>> GetAllCocheras()
         {
             var cocheras = _cocheraService.GetAllCocheras();
             if (cocheras == null || cocheras.Count == 0)
@@ -31,7 +32,7 @@ namespace EstacionamientoAustralApi.Controllers
 
         // Obtener una cochera por ID
         [HttpGet("{id}")]
-        public ActionResult<Cochera> GetCocheraById(int id)
+        public ActionResult<CocheraDto> GetCocheraById(int id)
         {
             var cochera = _cocheraService.GetCocheraById(id);
             if (cochera == null)
@@ -44,7 +45,7 @@ namespace EstacionamientoAustralApi.Controllers
 
         // Agregar una nueva cochera
         [HttpPost]
-        public ActionResult<int> AddCochera([FromBody] Cochera cochera)
+        public ActionResult<int> AddCochera([FromBody] CocheraDto cochera)
         {
             if (string.IsNullOrEmpty(cochera.Descripcion))
             {

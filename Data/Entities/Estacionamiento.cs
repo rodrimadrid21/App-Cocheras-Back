@@ -14,9 +14,8 @@ namespace Data.Entities
         public DateTime? HoraEgreso { get; set; } // Se puede cambiar a DateTime para manejar mejor las fechas
         public decimal Costo { get; set; } // Costo del estacionamiento
         public int IdUsuarioIngreso { get; set; } // Usuario que ingresó el vehículo
-        public int? IdUsuarioEgreso { get; set; } // Usuario que retiró el vehículo
+        public int IdUsuarioEgreso { get; set; } // Usuario que retiró el vehículo
         public int IdCochera { get; set; } // Id de la cochera ocupada
         public bool Eliminado { get; set; } // Para control de soft delete
     }
 }
-

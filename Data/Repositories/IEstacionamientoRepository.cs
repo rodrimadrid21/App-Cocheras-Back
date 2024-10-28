@@ -109,13 +109,14 @@ namespace Data.Repositories
         {
             // Obtener tarifas usando el repositorio de tarifas
             var tarifaMediaHora = _tarifaRepository.GetAllTarifas()
-                .FirstOrDefault(t => t.Descripcion == "Media Hora");
-            var tarifaHora = _tarifaRepository.GetAllTarifas()
-                .FirstOrDefault(t => t.Descripcion == "1 Hora");
-
+                .FirstOrDefault(t => t.Descripcion == "MEDIA HORA");
+            var tarifaUnaHora = _tarifaRepository.GetAllTarifas()
+                .FirstOrDefault(t => t.Descripcion == "UNA HORA");
+            var tarifaValorHora = _tarifaRepository.GetAllTarifas()
+                .FirstOrDefault(t => t.Descripcion == "VALOR HORA");
 
             // Validar que las tarifas no sean nulas antes de usarlas
-            if (tarifaMediaHora == null || tarifaHora == null)
+            if (tarifaMediaHora == null || tarifaUnaHora == null || tarifaValorHora == null)
             {
                 throw new InvalidOperationException("Las tarifas requeridas no están definidas en la base de datos.");
             }
@@ -125,10 +126,16 @@ namespace Data.Repositories
             {
                 return tarifaMediaHora.Valor;
             }
+            else if (minutosEstacionados <= 60)
+            {
+                return tarifaUnaHora.Valor;
+            }
             else
             {
-                return (decimal)(minutosEstacionados / 60) * tarifaHora.Valor;
+                // Usamos tarifaValorHora para cada hora adicional después de la primera
+                return (decimal)(minutosEstacionados / 60) * tarifaValorHora.Valor;
             }
         }
     }
+    
 }
