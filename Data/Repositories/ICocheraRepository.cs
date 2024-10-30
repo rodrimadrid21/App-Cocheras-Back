@@ -17,13 +17,13 @@ namespace Data.Repositories
             _context = context;
         }
 
-        // Obtener todas las cocheras que no estén eliminadas
+        // Obtener todas las cocheras
         public List<Cochera> GetAllCocheras()
         {
             return _context.Cocheras.Where(c => !c.Eliminada).ToList();
         }
 
-        // Obtener cochera por ID si no está eliminada
+        // Obtener cochera por ID
         public Cochera GetCocheraById(int id)
         {
             return _context.Cocheras.FirstOrDefault(c => c.Id == id && !c.Eliminada);

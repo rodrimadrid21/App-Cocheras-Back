@@ -1,8 +1,10 @@
-﻿using Data.context;
+﻿using Common.Dtos;
+using Data.context;
 using Data.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+
 
 namespace Data.Repositories
 {
@@ -11,11 +13,13 @@ namespace Data.Repositories
   
         private readonly ApplicationContext _context;
         private readonly ITarifaRepository _tarifaRepository; // Inyección de dependencia
+        private readonly ICocheraRepository _cocheraRepository;
 
-        public IEstacionamientoRepository(ApplicationContext context, ITarifaRepository tarifaRepository)
+        public IEstacionamientoRepository(ApplicationContext context, ITarifaRepository tarifaRepository, ICocheraRepository cocheraRepository)
         {
             _context = context;
             _tarifaRepository = tarifaRepository; // Asignamos el repositorio de tarifas
+            _cocheraRepository = cocheraRepository;
         }
 
         public List<Estacionamiento> GetAllEstacionamientos()
@@ -43,12 +47,15 @@ namespace Data.Repositories
 
         public void DeleteEstacionamiento(int id)
         {
-            var estacionamiento = _context.Estacionamientos.Find(id);
+            var estacionamiento = _context.Estacionamientos
+                                  .FirstOrDefault(e => e.Id == id);
             if (estacionamiento != null)
             {
                 estacionamiento.Eliminado = true;
                 _context.SaveChanges();
+                _cocheraRepository.SoftDeleteCochera(estacionamiento.IdCochera);
             }
+
         }
 
         // Nueva funcionalidad: abrir cochera

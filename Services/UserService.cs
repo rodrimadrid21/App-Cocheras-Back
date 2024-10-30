@@ -14,13 +14,13 @@ namespace Services
             _repository = repository;
         }
 
-        // Autenticación del usuario
+        //Autenticación del usuario
         public User Authenticate(string username, string password)
         {
             return _repository.Authenticate(username, password);
         }
 
-        // Obtener todos los usuarios no eliminados
+        //Obtener todos los usuarios
         public List<UserDto> GetAllUsers()
         {
             return _repository.GetAllUsers()
@@ -35,7 +35,7 @@ namespace Services
                 }).ToList();
         }
 
-        // Obtener un usuario por su ID
+        //Obtener un usuario por su ID
         public User GetUserById(int id)
         {
             return _repository.GetUserById(id);
