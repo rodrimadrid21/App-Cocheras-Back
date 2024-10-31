@@ -56,6 +56,7 @@ namespace EstacionamientoAustralApi.Controllers
             return Ok(new { message = "Cochera agregada con éxito.", cocheraId });
         }
 
+
         // Actualizar la descripción de una cochera
         [HttpPut("{id}")]
         public ActionResult UpdateCochera(int id, [FromBody] string descripcion)

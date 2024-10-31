@@ -53,7 +53,7 @@ namespace Data.Repositories
             {
                 estacionamiento.Eliminado = true;
                 _context.SaveChanges();
-                _cocheraRepository.SoftDeleteCochera(estacionamiento.IdCochera);
+                _cocheraRepository.EnableCochera(estacionamiento.IdCochera);
             }
 
         }
