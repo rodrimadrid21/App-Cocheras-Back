@@ -110,6 +110,24 @@ namespace EstacionamientoAustralApi.Controllers
             _estacionamientoService.CerrarEstacionamiento(cerrarDto.Patente, cerrarDto.IdUsuarioEgreso);
             return Ok(new { message = "Cochera cerrada con éxito." });
         }
+
+        // Obtener las últimas transacciones
+        [HttpGet("UltimasTransacciones")]
+        public IActionResult GetUltimasTransacciones([FromQuery] int cantidad)
+        {
+            if (cantidad <= 0)
+            {
+                return BadRequest("La cantidad debe ser un número positivo.");
+            }
+
+            var transacciones = _estacionamientoService.GetUltimasTransacciones(cantidad);
+            if (transacciones == null || transacciones.Count == 0)
+            {
+                return NotFound("No se encontraron transacciones recientes.");
+            }
+
+            return Ok(transacciones);
+        }
     }
 
     // DTOs utilizados para abrir y cerrar estacionamientos
@@ -126,3 +144,4 @@ namespace EstacionamientoAustralApi.Controllers
         public int IdUsuarioEgreso { get; set; }
     }
 }
+

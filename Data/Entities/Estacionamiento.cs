@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Data.Entities
 {
@@ -17,5 +13,8 @@ namespace Data.Entities
         public int IdUsuarioEgreso { get; set; }
         public int IdCochera { get; set; }
         public bool Eliminado { get; set; }
+
+        // Agregamos la propiedad de navegación hacia Cochera para poder acceder a sus detalles
+        public Cochera Cochera { get; set; } // Nueva propiedad de navegación
     }
 }

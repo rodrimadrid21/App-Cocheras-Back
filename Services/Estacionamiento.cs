@@ -1,7 +1,6 @@
 ﻿using Common.Dtos;
 using Data.Entities;
 using Data.Repositories;
-using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -16,7 +15,7 @@ namespace Services
             _repository = repository;
         }
 
-        // Obtener todos los estacionamientos que no han sido eliminados
+        // Obtener todas las transacciones de estacionamiento que no han sido eliminadas
         public List<EstacionamientoDto> GetAllEstacionamientos()
         {
             return _repository.GetAllEstacionamientos()
@@ -64,8 +63,17 @@ namespace Services
             _repository.CerrarEstacionamiento(patente, idUsuarioEgreso);
         }
 
+        // Obtener las últimas transacciones (n cantidad de registros)
+        public List<EstacionamientoDto> GetUltimasTransacciones(int cantidad)
+        {
+            // Llama al método del repositorio para obtener las últimas transacciones
+            return _repository.GetUltimasTransacciones(cantidad)
+                              .Select(estacionamiento => MapToDto(estacionamiento))
+                              .ToList();
+        }
+
         // Método de mapeo de entidad a DTO
-        private EstacionamientoDto MapToDto(Estacionamiento estacionamiento)
+        public EstacionamientoDto MapToDto(Estacionamiento estacionamiento)
         {
             return new EstacionamientoDto
             {
@@ -77,12 +85,17 @@ namespace Services
                 IdUsuarioIngreso = estacionamiento.IdUsuarioIngreso,
                 IdUsuarioEgreso = estacionamiento.IdUsuarioEgreso,
                 IdCochera = estacionamiento.IdCochera,
-                Eliminado = estacionamiento.Eliminado
+                Eliminado = estacionamiento.Eliminado,
+                Cochera = new CocheraDto // Asegúrate de mapear también la Cochera asociada
+                {
+                    Descripcion = estacionamiento.Cochera?.Descripcion // Incluye la descripción de la cochera
+                }
             };
         }
 
+
         // Método de mapeo de DTO a entidad
-        private Estacionamiento MapToEntity(EstacionamientoDto estacionamientoDto)
+        public Estacionamiento MapToEntity(EstacionamientoDto estacionamientoDto)
         {
             return new Estacionamiento
             {
@@ -97,6 +110,5 @@ namespace Services
                 Eliminado = estacionamientoDto.Eliminado
             };
         }
-
     }
 }

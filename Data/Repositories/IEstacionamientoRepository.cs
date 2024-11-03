@@ -1,6 +1,7 @@
 ﻿using Common.Dtos;
 using Data.context;
 using Data.Entities;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -83,7 +84,16 @@ namespace Data.Repositories
             _context.SaveChanges();
             return nuevoEstacionamiento.Id;
         }
+        public List<Estacionamiento> GetUltimasTransacciones(int cantidad)
+        {
+            // Usa Include para cargar la información de la Cochera asociada
+            return _context.Estacionamientos
+                   .Include(e => e.Cochera)
+                   .OrderByDescending(e => e.HoraEgreso)
+                   .Take(cantidad)
+                   .ToList();
 
+        }
         // Nueva funcionalidad: cerrar cochera
         public void CerrarEstacionamiento(string patente, int idUsuarioEgreso)
         {
@@ -112,7 +122,7 @@ namespace Data.Repositories
             _context.SaveChanges();
         }
 
-        private decimal CalcularCosto(double minutosEstacionados)
+        public decimal CalcularCosto(double minutosEstacionados)
         {
             // Obtener tarifas usando el repositorio de tarifas
             var tarifaMediaHora = _tarifaRepository.GetAllTarifas()

@@ -9,10 +9,12 @@ namespace Services
     public class TarifaService
     {
         private readonly ITarifaRepository _repository;
+        private readonly IEstacionamientoRepository _estacionamientorepository;
 
-        public TarifaService(ITarifaRepository repository)
+        public TarifaService(ITarifaRepository repository, IEstacionamientoRepository estacionamientorepository)
         {
             _repository = repository;
+            _estacionamientorepository = estacionamientorepository;
         }
 
         // Obtener todas las tarifas como DTOs
