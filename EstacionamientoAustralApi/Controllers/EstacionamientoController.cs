@@ -1,4 +1,5 @@
-﻿using Data.Entities;
+﻿using Common.Dtos;
+using Data.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Services;
 using System.Collections.Generic;
@@ -18,7 +19,7 @@ namespace EstacionamientoAustralApi.Controllers
 
         // Obtener todos los estacionamientos no eliminados
         [HttpGet]
-        public ActionResult<List<Estacionamiento>> GetAllEstacionamientos()
+        public ActionResult<List<EstacionamientoDto>> GetAllEstacionamientos()
         {
             var estacionamientos = _estacionamientoService.GetAllEstacionamientos();
             if (estacionamientos == null || estacionamientos.Count == 0)
@@ -31,7 +32,7 @@ namespace EstacionamientoAustralApi.Controllers
 
         // Obtener un estacionamiento por su ID
         [HttpGet("{id}")]
-        public ActionResult<Estacionamiento> GetEstacionamientoById(int id)
+        public ActionResult<EstacionamientoDto> GetEstacionamientoById(int id)
         {
             var estacionamiento = _estacionamientoService.GetEstacionamientoById(id);
             if (estacionamiento == null)
@@ -44,7 +45,7 @@ namespace EstacionamientoAustralApi.Controllers
 
         // Agregar un nuevo estacionamiento
         [HttpPost]
-        public ActionResult<int> AddEstacionamiento([FromBody] Estacionamiento estacionamiento)
+        public ActionResult<int> AddEstacionamiento([FromBody] EstacionamientoDto estacionamiento)
         {
             if (estacionamiento == null || estacionamiento.Patente == null || estacionamiento.IdCochera == 0)
             {
@@ -57,7 +58,7 @@ namespace EstacionamientoAustralApi.Controllers
 
         // Actualizar un estacionamiento existente
         [HttpPut("{id}")]
-        public ActionResult UpdateEstacionamiento(int id, [FromBody] Estacionamiento estacionamiento)
+        public ActionResult UpdateEstacionamiento(int id, [FromBody] EstacionamientoDto estacionamiento)
         {
             var existingEstacionamiento = _estacionamientoService.GetEstacionamientoById(id);
             if (existingEstacionamiento == null)
@@ -98,7 +99,7 @@ namespace EstacionamientoAustralApi.Controllers
         }
 
         // Cerrar una cochera
-        [HttpPost("cerrar")]
+        [HttpPatch("cerrar")]
         public ActionResult CerrarEstacionamiento([FromBody] CerrarEstacionamientoDto cerrarDto)
         {
             if (cerrarDto == null || string.IsNullOrEmpty(cerrarDto.Patente) || cerrarDto.IdUsuarioEgreso == 0)
@@ -108,6 +109,24 @@ namespace EstacionamientoAustralApi.Controllers
 
             _estacionamientoService.CerrarEstacionamiento(cerrarDto.Patente, cerrarDto.IdUsuarioEgreso);
             return Ok(new { message = "Cochera cerrada con éxito." });
+        }
+
+        // Obtener las últimas transacciones
+        [HttpGet("UltimasTransacciones")]
+        public IActionResult GetUltimasTransacciones([FromQuery] int cantidad)
+        {
+            if (cantidad <= 0)
+            {
+                return BadRequest("La cantidad debe ser un número positivo.");
+            }
+
+            var transacciones = _estacionamientoService.GetUltimasTransacciones(cantidad);
+            if (transacciones == null || transacciones.Count == 0)
+            {
+                return NotFound("No se encontraron transacciones recientes.");
+            }
+
+            return Ok(transacciones);
         }
     }
 
@@ -125,3 +144,4 @@ namespace EstacionamientoAustralApi.Controllers
         public int IdUsuarioEgreso { get; set; }
     }
 }
+

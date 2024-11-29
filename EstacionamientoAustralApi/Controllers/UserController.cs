@@ -28,6 +28,12 @@ namespace EstacionamientoAustralApi.Controllers
                 return BadRequest("El nombre de usuario y la contraseña son obligatorios.");
             }
 
+            var existingUser = _userService.GetUserByUsername(userDto.Username);
+            if (existingUser != null)
+            {
+                return BadRequest("El nombre de usuario ya está en uso.");
+            }
+
             var newUser = new User
             {
                 Username = userDto.Username,
@@ -43,7 +49,7 @@ namespace EstacionamientoAustralApi.Controllers
 
         // Obtener todos los usuarios
         [HttpGet("all")]
-        public IActionResult GetAllUsers()
+        public ActionResult<List<UserDto>> GetAllUsers()
         {
             var users = _userService.GetAllUsers();
             if (users == null || !users.Any())
@@ -64,7 +70,7 @@ namespace EstacionamientoAustralApi.Controllers
 
         // Obtener un usuario por ID
         [HttpGet("{id}")]
-        public IActionResult GetUserById(int id)
+        public ActionResult<UserDto> GetUserById(int id)
         {
             var user = _userService.GetUserById(id);
             if (user == null)
@@ -82,6 +88,27 @@ namespace EstacionamientoAustralApi.Controllers
 
             return Ok(userDto);
         }
+        // Obtener un usuario por username
+        [HttpGet("by-username/{username}")]
+        public ActionResult<UserDto> GetUserByUsername(string username)
+        {
+            var user = _userService.GetUserByUsername(username);
+            if (user == null)
+            {
+                return NotFound($"No se encontró un usuario con el username '{username}'");
+            }
+
+            var userDto = new UserDto
+            {
+                Username = user.Username,
+                Nombre = user.Nombre,
+                Apellido = user.Apellido,
+                EsAdmin = user.EsAdmin
+            };
+
+            return Ok(userDto);
+        }
+
 
         // Actualizar un usuario
         [HttpPut("{id}")]

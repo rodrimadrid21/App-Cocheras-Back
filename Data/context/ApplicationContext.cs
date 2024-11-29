@@ -1,10 +1,5 @@
 ﻿using Data.Entities;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Data.context
 {
@@ -16,5 +11,16 @@ namespace Data.context
         public DbSet<Tarifa> Tarifas { get; set; }
 
         public ApplicationContext(DbContextOptions<ApplicationContext> options) : base(options) { }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            // Configuración de la relación entre Estacionamiento y Cochera
+            modelBuilder.Entity<Estacionamiento>()
+                .HasOne(e => e.Cochera) // Estacionamiento tiene una Cochera
+                .WithMany() // Cochera no tiene una lista de Estacionamientos asociados
+                .HasForeignKey(e => e.IdCochera); // Usa IdCochera como llave foránea
+
+            base.OnModelCreating(modelBuilder); // Llama al método base
+        }
     }
 }

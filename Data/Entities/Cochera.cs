@@ -9,8 +9,8 @@ namespace Data.Entities
     public class Cochera
     {
         public int Id { get; set; }
-        public string Descripcion { get; set; }
-        public bool Deshabilitada { get; set; }  // Cambiado a bool
+        public string Descripcion { get; set; } = string.Empty;
+        public bool Deshabilitada { get; set; }
         public bool Eliminada { get; set; }
     }
 }

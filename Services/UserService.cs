@@ -1,6 +1,7 @@
 ﻿using Data.Repositories;
 using Data.Entities;
 using System.Collections.Generic;
+using Common.Dtos;
 
 namespace Services
 {
@@ -13,19 +14,28 @@ namespace Services
             _repository = repository;
         }
 
-        // Autenticación del usuario
+        //Autenticación del usuario
         public User Authenticate(string username, string password)
         {
             return _repository.Authenticate(username, password);
         }
 
-        // Obtener todos los usuarios no eliminados
-        public List<User> GetAllUsers()
+        //Obtener todos los usuarios
+        public List<UserDto> GetAllUsers()
         {
-            return _repository.GetAllUsers();
+            return _repository.GetAllUsers()
+                .Select(u => new UserDto
+                {
+                    Username = u.Username,
+                    Nombre = u.Nombre,
+                    Apellido = u.Apellido,
+                    Password = u.Password,
+                    Eliminado = u.Eliminado,
+                    EsAdmin = u.EsAdmin
+                }).ToList();
         }
 
-        // Obtener un usuario por su ID
+        //Obtener un usuario por su ID
         public User GetUserById(int id)
         {
             return _repository.GetUserById(id);

@@ -1,6 +1,7 @@
 ﻿using Data.Entities;
 using Data.Repositories;
 using System.Collections.Generic;
+using Common.Dtos;
 
 namespace Services
 {
@@ -13,23 +14,50 @@ namespace Services
             _repository = repository;
         }
 
-        // Obtener todas las cocheras no eliminadas
-        public List<Cochera> GetAllCocheras()
+        // Obtener todas las cocheras
+        public List<CocheraDto> GetAllCocheras()
         {
-            return _repository.GetAllCocheras();
+            return _repository.GetAllCocheras()
+                              .Select(cochera => new CocheraDto
+                              {
+                                  Id = cochera.Id,
+                                  Descripcion = cochera.Descripcion,
+                                  Deshabilitada = cochera.Deshabilitada,
+                                  Eliminada = cochera.Eliminada,
+                                  // Agrega aquí las demás propiedades según tu DTO
+                              }).ToList();
         }
 
         // Obtener una cochera por ID
-        public Cochera GetCocheraById(int id)
+        public CocheraDto GetCocheraById(int id)
         {
-            return _repository.GetCocheraById(id);
+            var cochera = _repository.GetCocheraById(id);
+            if (cochera == null) return null;
+
+            return new CocheraDto
+            {
+                Id = cochera.Id,
+                Descripcion = cochera.Descripcion,
+                Deshabilitada = cochera.Deshabilitada,
+                Eliminada = cochera.Eliminada,
+                // Agrega aquí las demás propiedades según tu DTO
+            };
         }
 
         // Agregar una nueva cochera
-        public int AddCochera(Cochera cochera)
+        public int AddCochera(CocheraDto cocheraDto)
         {
+            var cochera = new Cochera
+            {
+                Descripcion = cocheraDto.Descripcion,
+                Deshabilitada = cocheraDto.Deshabilitada,
+                Eliminada = cocheraDto.Eliminada,
+                // Agrega aquí las demás propiedades necesarias
+            };
+
             return _repository.AddCochera(cochera);
         }
+
 
         // Actualizar la descripción de una cochera
         public void UpdateCochera(int id, string descripcion)

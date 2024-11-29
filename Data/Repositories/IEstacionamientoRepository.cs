@@ -1,18 +1,26 @@
-﻿using Data.context;
+﻿using Common.Dtos;
+using Data.context;
 using Data.Entities;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+
 
 namespace Data.Repositories
 {
     public class IEstacionamientoRepository
     {
+  
         private readonly ApplicationContext _context;
+        private readonly ITarifaRepository _tarifaRepository; // Inyección de dependencia
+        private readonly ICocheraRepository _cocheraRepository;
 
-        public IEstacionamientoRepository(ApplicationContext context)
+        public IEstacionamientoRepository(ApplicationContext context, ITarifaRepository tarifaRepository, ICocheraRepository cocheraRepository)
         {
             _context = context;
+            _tarifaRepository = tarifaRepository; // Asignamos el repositorio de tarifas
+            _cocheraRepository = cocheraRepository;
         }
 
         public List<Estacionamiento> GetAllEstacionamientos()
@@ -40,12 +48,15 @@ namespace Data.Repositories
 
         public void DeleteEstacionamiento(int id)
         {
-            var estacionamiento = _context.Estacionamientos.Find(id);
+            var estacionamiento = _context.Estacionamientos
+                                  .FirstOrDefault(e => e.Id == id);
             if (estacionamiento != null)
             {
                 estacionamiento.Eliminado = true;
                 _context.SaveChanges();
+                _cocheraRepository.EnableCochera(estacionamiento.IdCochera);
             }
+
         }
 
         // Nueva funcionalidad: abrir cochera
@@ -73,7 +84,16 @@ namespace Data.Repositories
             _context.SaveChanges();
             return nuevoEstacionamiento.Id;
         }
+        public List<Estacionamiento> GetUltimasTransacciones(int cantidad)
+        {
+            // Usa Include para cargar la información de la Cochera asociada
+            return _context.Estacionamientos
+                   .Include(e => e.Cochera)
+                   .OrderByDescending(e => e.HoraEgreso)
+                   .Take(cantidad)
+                   .ToList();
 
+        }
         // Nueva funcionalidad: cerrar cochera
         public void CerrarEstacionamiento(string patente, int idUsuarioEgreso)
         {
@@ -102,20 +122,37 @@ namespace Data.Repositories
             _context.SaveChanges();
         }
 
-        private decimal CalcularCosto(double minutosEstacionados)
+        public decimal CalcularCosto(double minutosEstacionados)
         {
-            // Ejemplo básico de cálculo, asumiendo que las tarifas están definidas en el contexto
-            var tarifaMediaHora = _context.Tarifas.FirstOrDefault(t => t.Descripcion == "MEDIAHORA");
-            var tarifaHora = _context.Tarifas.FirstOrDefault(t => t.Descripcion == "VALORHORA");
+            // Obtener tarifas usando el repositorio de tarifas
+            var tarifaMediaHora = _tarifaRepository.GetAllTarifas()
+                .FirstOrDefault(t => t.Descripcion == "MEDIA HORA");
+            var tarifaUnaHora = _tarifaRepository.GetAllTarifas()
+                .FirstOrDefault(t => t.Descripcion == "UNA HORA");
+            var tarifaValorHora = _tarifaRepository.GetAllTarifas()
+                .FirstOrDefault(t => t.Descripcion == "VALOR HORA");
 
+            // Validar que las tarifas no sean nulas antes de usarlas
+            if (tarifaMediaHora == null || tarifaUnaHora == null || tarifaValorHora == null)
+            {
+                throw new InvalidOperationException("Las tarifas requeridas no están definidas en la base de datos.");
+            }
+
+            // Calcular el costo según el tiempo estacionado
             if (minutosEstacionados <= 30)
             {
-                return tarifaMediaHora?.Valor ?? 0;
+                return tarifaMediaHora.Valor;
+            }
+            else if (minutosEstacionados <= 60)
+            {
+                return tarifaUnaHora.Valor;
             }
             else
             {
-                return (decimal)(minutosEstacionados / 60) * (tarifaHora?.Valor ?? 0);
+                // Usamos tarifaValorHora para cada hora adicional después de la primera
+                return (decimal)(minutosEstacionados / 60) * tarifaValorHora.Valor;
             }
         }
     }
+    
 }

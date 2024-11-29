@@ -3,6 +3,8 @@ using Data.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
+
 
 namespace Data.Repositories
 {
@@ -15,24 +17,33 @@ namespace Data.Repositories
             _context = context;
         }
 
-        // Obtener todas las cocheras que no estén eliminadas
+        // Obtener todas las cocheras
         public List<Cochera> GetAllCocheras()
         {
             return _context.Cocheras.Where(c => !c.Eliminada).ToList();
         }
 
-        // Obtener cochera por ID si no está eliminada
-        public Cochera GetCocheraById(int id)
-        {
-            return _context.Cocheras.FirstOrDefault(c => c.Id == id && !c.Eliminada);
-        }
-
         // Agregar una nueva cochera
         public int AddCochera(Cochera cochera)
         {
+            // Buscar el primer ID disponible
+            var existingIds = _context.Cocheras.Where(c => !c.Eliminada).Select(c => c.Id).ToList();
+            int newId = 0;
+            while (existingIds.Contains(newId))
+            {
+                newId++;
+            }
+
+            cochera.Id = newId; // Asignar el ID disponible
             _context.Cocheras.Add(cochera);
             _context.SaveChanges();
             return cochera.Id;
+        }
+
+        // Obtener cochera por ID
+        public Cochera GetCocheraById(int id)
+        {
+            return _context.Cocheras.FirstOrDefault(c => c.Id == id && !c.Eliminada);
         }
 
         // Actualizar la descripción de una cochera existente
